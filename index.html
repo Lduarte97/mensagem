@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uma Surpresa para Você ❤️</title>
+    <style>
+        /* --- ESTILOS CSS --- */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fce4ec; /* Rosa claro de fundo */
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; /* Para a chuva de corações não criar barras de rolagem */
+        }
+
+        .wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Container da CARTA (AUMENTADO) */
+        .container {
+            width: 500px;
+            height: 450px;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0); /* Começa invisível e menor */
+            transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
+            opacity: 0;
+            z-index: 10;
+            text-align: center;
+            overflow-y: auto; /* Permite rolagem interna se o texto for muito grande */
+        }
+
+        .container.open {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .container h1 {
+            color: #d81b60; /* Rosa escuro */
+            margin-top: 20px;
+            font-size: 28px;
+        }
+
+        .container p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        /* Foto da Mulher (BEM MAIOR) */
+        .foto {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            object-fit: cover; /* Ajusta a foto dentro do círculo */
+            border: 6px solid #f8bbd0;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        /* Estilos do ENVELOPE (AUMENTADO) */
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            z-index: 5;
+            transition: transform 0.3s ease;
+            width: 550px;
+            height: 366px;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.03);
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #f44336; /* Cor do envelope (Vermelho) */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Parte da frente do envelope */
+        .envelope::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
+            border-top: 183px solid transparent;
+            border-right: 275px solid #ef5350; /* Vermelho mais claro para contraste */
+            border-bottom: 183px solid #ef5350;
+            border-left: 275px solid transparent;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        /* A "aba" superior do envelope */
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 275px solid transparent;
+            border-right: 275px solid transparent;
+            border-top: 183px solid #d32f2f; /* Vermelho mais escuro para a aba */
+            border-radius: 15px 15px 0 0;
+            transform-origin: top;
+            transition: transform 0.4s ease;
+            z-index: 3;
+        }
+
+        /* Quando o envelope abre, a aba sobe */
+        .envelope-wrapper.open .flap {
+            transform: rotateX(180deg);
+            z-index: 1; /* Move para trás da carta quando abre */
+        }
+
+        /* O SELO (Coração) */
+        .heart {
+            position: absolute;
+            top: 165px;
+            left: 258px;
+            width: 34px;
+            height: 34px;
+            background-color: #ffeb3b; /* Amarelo */
+            transform: rotate(45deg);
+            z-index: 4;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .heart::before, .heart::after {
+            content: "";
+            position: absolute;
+            width: 34px;
+            height: 34px;
+            background-color: #ffeb3b;
+            border-radius: 50%;
+        }
+
+        .heart::before {
+            top: -17px;
+            left: 0;
+        }
+
+        .heart::after {
+            top: 0;
+            left: -17px;
+        }
+
+        .heart:hover {
+            transform: rotate(45deg) scale(1.15);
+            background-color: #fbc02d; /* Amarelo mais escuro no hover */
+        }
+
+        .heart:hover::before, .heart:hover::after {
+            background-color: #fbc02d;
+        }
+
+        /* Estilos do POPUP DA SENHA */
+        #password-popup {
+            display: none; /* Escondido por padrão */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            z-index: 100;
+            text-align: center;
+            width: 320px;
+        }
+
+        #password-popup.visible {
+            display: block;
+        }
+
+        #password-popup input {
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #f8bbd0;
+            border-radius: 8px;
+            width: 85%;
+            font-size: 16px;
+        }
+
+        #password-popup button {
+            padding: 12px 30px;
+            background-color: #d81b60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #password-popup button:hover {
+            background-color: #ad1457;
+        }
+
+        #error-message {
+            color: #d32f2f;
+            display: none; /* Escondido por padrão */
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Overlay escuro de fundo para o popup */
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+        #overlay.visible {
+            display: block;
+        }
+
+        /* Estilos da CHUVA DE CORAÇÕES */
+        .falling-heart {
+            position: fixed;
+            top: -20px;
+            color: #e91e63;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0; /* Fica atrás de tudo */
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(105vh);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay"></div>
+    <div id="password-popup">
+        <h3>Uma pergunta para você:</h3>
+        <p>Qual é o nome da mulher mais incrível deste mundo? ❤️</p>
+        <p style="font-size: 12px; color: #888;">(Dica: Digite exatamente o nome dela)</p>
+        <input type="text" id="password-input" placeholder="O nome dela...">
+        <br>
+        <button id="submit-password">Enviar</button>
+        <p id="error-message">Humm, esse não parece ser o nome correto... Tente novamente! 😉</p>
+    </div>
+
+    <div class="wrapper">
+        <div class="envelope-wrapper" id="envelope-wrapper">
+            <div class="flap"></div>
+            <div class="envelope"></div>
+            <div class="heart" id="seal" title="Clique para abrir"></div>
+        </div>
+
+        <div class="container" id="letter">
+            <!-- DICA: Verifique se a extensão da imagem é exatamente minúscula .jpg -->
+            <img src="foto.jpeg" alt="Alexia" class="foto">
+            
+            <h1>Para a mulher que eu gosto</h1>
+            
+            <p>
+                Alexia, cada detalhe seu me encanta, sua presença ilumina meus dias e seu sorriso é a coisa mais linda que já vi. 
+                Queria apenas que soubesse o quanto você é especial para mim e que tem sido maravilhoso ter você na minha vida. ❤️
+            </p>
+        </div>
+    </div>
+
+    <script>
+        /* --- JAVASCRIPT --- */
+        const NOME_DELA = "alexia"; 
+        let chuvaInterval = null;
+
+        // Seleção de elementos
+        const seal = document.getElementById('seal');
+        const overlay = document.getElementById('overlay');
+        const popup = document.getElementById('password-popup');
+        const input = document.getElementById('password-input');
+        const submitBtn = document.getElementById('submit-password');
+        const errorMessage = document.getElementById('error-message');
+        const envelopeWrapper = document.getElementById('envelope-wrapper');
+        const letter = document.getElementById('letter');
+
+        const audio = new Audio('musica.mp3'); 
+
+        // 1. Clicar no selo (coração) abre o popup da senha
+        seal.addEventListener('click', () => {
+            overlay.classList.add('visible');
+            popup.classList.add('visible');
+            input.focus(); 
+        });
+
+        // 2. Lógica para verificar a senha
+        submitBtn.addEventListener('click', verificarSenha);
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                verificarSenha();
+            }
+        });
+
+        function verificarSenha() {
+            const senhaDigitada = input.value.trim(); 
+
+            if (senhaDigitada.toLowerCase() === NOME_DELA.toLowerCase()) {
+                // CORREÇÃO: Tocar o áudio IMEDIATAMENTE no clique do usuário para o navegador permitir
+                tocarMusica();
+                fecharPopup();
+                abrirEnvelopeEALetter();
+            } else {
+                errorMessage.style.display = 'block';
+                input.value = ''; 
+                input.focus();
+            }
+        }
+
+        function fecharPopup() {
+            overlay.classList.remove('visible');
+            popup.classList.remove('visible');
+            errorMessage.style.display = 'none';
+        }
+
+        // 3. Função que abre o envelope e exibe a carta
+        function abrirEnvelopeEALetter() {
+            envelopeWrapper.classList.add('open');
+
+            setTimeout(() => {
+                letter.classList.add('open');
+                iniciarChuvaDeCoracoes();
+            }, 600);
+        }
+
+        function tocarMusica() {
+            audio.play().catch(error => {
+                console.log("A reprodução automática foi bloqueada pelo navegador.", error);
+            });
+        }
+
+        // 4. Lógica da Chuva de Corações
+        function iniciarChuvaDeCoracoes() {
+            chuvaInterval = setInterval(criarCoracao, 120);
+            
+            // Para a geração de novos corações após 15 segundos
+            setTimeout(() => {
+                 clearInterval(chuvaInterval);
+            }, 15000);
+        }
+
+        function criarCoracao() {
+            const heart = document.createElement('div');
+            heart.classList.add('falling-heart');
+            heart.innerHTML = '❤️'; 
+            
+            heart.style.left = Math.random() * 100 + 'vw';
+            
+            const size = (Math.random() * 25 + 15) + 'px';
+            heart.style.fontSize = size;
+            
+            const duration = Math.random() * 3 + 3 + 's';
+            heart.style.animationDuration = duration;
+            heart.style.opacity = Math.random() * 0.5 + 0.5;
+
+            document.body.appendChild(heart);
+
+            setTimeout(() => {
+                heart.remove();
+            }, parseFloat(duration) * 1000); 
+        }
+    </script>
+</body>
+</html>
